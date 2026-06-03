@@ -1,0 +1,1182 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ColPLC v1.0 — PLC Industrial Colombiano</title>
+<style>
+  :root {
+    --azul:    #1a3a5c;
+    --azul2:   #2563a8;
+    --verde:   #16a34a;
+    --rojo:    #dc2626;
+    --amarillo:#d97706;
+    --gris:    #f1f5f9;
+    --borde:   #cbd5e1;
+    --texto:   #1e293b;
+    --blanco:  #ffffff;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Segoe UI',Arial,sans-serif;background:#e8edf2;color:var(--texto);font-size:15px;}
+
+  /* NAV */
+  nav{position:fixed;top:0;left:0;width:260px;height:100vh;background:var(--azul);overflow-y:auto;z-index:100;padding:0 0 20px;}
+  nav .logo{padding:22px 20px 16px;border-bottom:1px solid #2d5080;}
+  nav .logo h1{color:#fff;font-size:1.25rem;font-weight:700;line-height:1.2;}
+  nav .logo p{color:#94b8d8;font-size:0.78rem;margin-top:4px;}
+  nav ul{list-style:none;padding:10px 0;}
+  nav ul li a{display:flex;align-items:center;gap:10px;padding:9px 20px;color:#c8ddf0;text-decoration:none;font-size:0.85rem;transition:background .2s,color .2s;}
+  nav ul li a:hover,nav ul li a.active{background:#2563a8;color:#fff;}
+  nav ul li a .ico{font-size:1rem;width:20px;text-align:center;}
+  nav ul .sep{padding:12px 20px 4px;color:#5a8ab0;font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;}
+
+  /* MAIN */
+  main{margin-left:260px;padding:30px 36px;min-height:100vh;}
+  section{display:none;}
+  section.active{display:block;}
+
+  /* HERO */
+  .hero{background:linear-gradient(135deg,var(--azul) 0%,var(--azul2) 100%);color:#fff;border-radius:14px;padding:44px 48px;margin-bottom:28px;position:relative;overflow:hidden;}
+  .hero::after{content:'';position:absolute;right:-40px;top:-40px;width:220px;height:220px;border-radius:50%;background:rgba(255,255,255,.06);}
+  .hero h2{font-size:2.2rem;font-weight:800;margin-bottom:8px;}
+  .hero p{font-size:1.05rem;opacity:.88;max-width:600px;line-height:1.6;}
+  .hero .badges{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px;}
+  .badge{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);color:#fff;padding:5px 14px;border-radius:20px;font-size:.8rem;font-weight:600;}
+
+  /* CARDS GRID */
+  .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px;margin-bottom:28px;}
+  .card{background:#fff;border-radius:10px;padding:20px;border:1px solid var(--borde);box-shadow:0 1px 4px rgba(0,0,0,.06);}
+  .card .val{font-size:1.7rem;font-weight:800;color:var(--azul2);line-height:1;}
+  .card .lbl{font-size:.8rem;color:#64748b;margin-top:4px;}
+  .card .ico2{font-size:1.6rem;margin-bottom:8px;}
+
+  /* SECTION TITLE */
+  h2.sec{font-size:1.4rem;font-weight:700;color:var(--azul);margin-bottom:18px;padding-bottom:8px;border-bottom:2px solid var(--azul2);}
+  h3.sub{font-size:1.05rem;font-weight:700;color:var(--azul);margin:22px 0 10px;}
+
+  /* TABLES */
+  .tbl-wrap{overflow-x:auto;margin-bottom:20px;}
+  table{width:100%;border-collapse:collapse;background:#fff;border-radius:8px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.06);}
+  th{background:var(--azul);color:#fff;padding:10px 14px;text-align:left;font-size:.82rem;font-weight:600;}
+  td{padding:9px 14px;border-bottom:1px solid #e2e8f0;font-size:.85rem;}
+  tr:last-child td{border-bottom:none;}
+  tr:nth-child(even) td{background:#f8fafc;}
+  td .tag-r{background:#fee2e2;color:#991b1b;padding:2px 8px;border-radius:10px;font-size:.75rem;font-weight:600;}
+  td .tag-rw{background:#dcfce7;color:#166534;padding:2px 8px;border-radius:10px;font-size:.75rem;font-weight:600;}
+
+  /* CODE BLOCKS */
+  pre{background:#0f172a;color:#e2e8f0;padding:18px 20px;border-radius:8px;overflow-x:auto;font-size:.82rem;line-height:1.6;margin-bottom:16px;}
+  code{font-family:'Consolas','Courier New',monospace;}
+
+  /* ALERTS / INFO BOXES */
+  .info{background:#eff6ff;border-left:4px solid var(--azul2);padding:14px 18px;border-radius:0 8px 8px 0;margin-bottom:16px;font-size:.88rem;}
+  .warn{background:#fffbeb;border-left:4px solid var(--amarillo);padding:14px 18px;border-radius:0 8px 8px 0;margin-bottom:16px;font-size:.88rem;}
+  .ok  {background:#f0fdf4;border-left:4px solid var(--verde);padding:14px 18px;border-radius:0 8px 8px 0;margin-bottom:16px;font-size:.88rem;}
+
+  /* BLOCK DIAGRAM */
+  .diagram{background:#fff;border:1px solid var(--borde);border-radius:10px;padding:24px;margin-bottom:20px;}
+  .blk-row{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-bottom:12px;}
+  .blk{border-radius:8px;padding:12px 18px;text-align:center;font-size:.82rem;font-weight:600;min-width:120px;}
+  .blk-cpu{background:#dbeafe;border:2px solid #3b82f6;color:#1e40af;}
+  .blk-pwr{background:#fef9c3;border:2px solid #eab308;color:#713f12;}
+  .blk-di {background:#dcfce7;border:2px solid #22c55e;color:#14532d;}
+  .blk-do {background:#fee2e2;border:2px solid #ef4444;color:#7f1d1d;}
+  .blk-com{background:#f3e8ff;border:2px solid #a855f7;color:#581c87;}
+  .blk-exp{background:#e0f2fe;border:2px solid #0ea5e9;color:#0c4a6e;}
+  .blk-fw {background:#fff7ed;border:2px solid #f97316;color:#7c2d12;}
+  .arrow{text-align:center;color:#94a3b8;font-size:1.4rem;margin:4px 0;}
+
+  /* LAYER STACK */
+  .layers{display:flex;flex-direction:column;gap:4px;max-width:500px;margin:0 auto 20px;}
+  .layer{padding:12px 20px;border-radius:6px;text-align:center;font-size:.85rem;font-weight:600;}
+  .l1{background:#fef3c7;border:1px solid #f59e0b;color:#78350f;}
+  .l2{background:#dbeafe;border:1px solid #3b82f6;color:#1e3a8a;}
+  .l3{background:#f3e8ff;border:1px solid #a855f7;color:#4c1d95;}
+  .l4{background:#dcfce7;border:1px solid #22c55e;color:#14532d;}
+  .l5{background:#ffe4e6;border:1px solid #f43f5e;color:#881337;}
+  .l6{background:#e0f2fe;border:1px solid #0ea5e9;color:#0c4a6e;}
+
+  /* COST BAR */
+  .cost-bar{display:flex;align-items:center;gap:12px;margin-bottom:8px;}
+  .cost-bar .lbl2{width:160px;font-size:.83rem;color:#475569;}
+  .cost-bar .bar{flex:1;background:#e2e8f0;border-radius:4px;height:18px;overflow:hidden;}
+  .cost-bar .fill{height:100%;border-radius:4px;background:var(--azul2);transition:width .6s;}
+  .cost-bar .val2{width:80px;text-align:right;font-size:.83rem;font-weight:700;color:var(--azul);}
+
+  /* LED INDICATORS */
+  .leds{display:flex;gap:16px;flex-wrap:wrap;margin-bottom:16px;}
+  .led-item{display:flex;align-items:center;gap:8px;background:#fff;border:1px solid var(--borde);border-radius:8px;padding:10px 16px;}
+  .led-dot{width:16px;height:16px;border-radius:50%;box-shadow:0 0 6px currentColor;}
+  .led-run{background:#22c55e;color:#22c55e;}
+  .led-err{background:#ef4444;color:#ef4444;}
+  .led-com{background:#eab308;color:#eab308;}
+  .led-prg{background:#3b82f6;color:#3b82f6;}
+
+  /* TIMELINE */
+  .timeline{position:relative;padding-left:28px;margin-bottom:20px;}
+  .timeline::before{content:'';position:absolute;left:8px;top:0;bottom:0;width:2px;background:var(--borde);}
+  .tl-item{position:relative;margin-bottom:18px;}
+  .tl-item::before{content:'';position:absolute;left:-24px;top:4px;width:12px;height:12px;border-radius:50%;background:var(--azul2);border:2px solid #fff;box-shadow:0 0 0 2px var(--azul2);}
+  .tl-item h4{font-size:.9rem;font-weight:700;color:var(--azul);}
+  .tl-item p{font-size:.83rem;color:#64748b;margin-top:2px;}
+
+  /* CHECKLIST */
+  .checklist{list-style:none;margin-bottom:16px;}
+  .checklist li{padding:6px 0;font-size:.87rem;display:flex;align-items:flex-start;gap:8px;}
+  .checklist li::before{content:'✓';color:var(--verde);font-weight:700;flex-shrink:0;}
+  .checklist li.warn-item::before{content:'⚠';color:var(--amarillo);}
+
+  /* RESPONSIVE */
+  @media(max-width:768px){
+    nav{width:100%;height:auto;position:relative;}
+    main{margin-left:0;padding:16px;}
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="logo">
+    <h1>⚙️ ColPLC v1.0</h1>
+    <p>PLC Industrial Colombiano</p>
+  </div>
+  <ul>
+    <li class="sep">General</li>
+    <li><a href="#" class="active" onclick="show('inicio',this)"><span class="ico">🏠</span>Inicio</a></li>
+    <li><a href="#" onclick="show('specs',this)"><span class="ico">📋</span>Especificaciones</a></li>
+    <li class="sep">Hardware</li>
+    <li><a href="#" onclick="show('arquitectura',this)"><span class="ico">🔲</span>Arquitectura</a></li>
+    <li><a href="#" onclick="show('entradas',this)"><span class="ico">🟢</span>Entradas Digitales</a></li>
+    <li><a href="#" onclick="show('salidas',this)"><span class="ico">🔴</span>Salidas a Relé</a></li>
+    <li><a href="#" onclick="show('alimentacion',this)"><span class="ico">⚡</span>Alimentación</a></li>
+    <li class="sep">Software</li>
+    <li><a href="#" onclick="show('firmware',this)"><span class="ico">💾</span>Firmware</a></li>
+    <li><a href="#" onclick="show('modbus',this)"><span class="ico">📡</span>Modbus RTU</a></li>
+    <li><a href="#" onclick="show('expansion',this)"><span class="ico">🔌</span>Expansión</a></li>
+    <li class="sep">Producción</li>
+    <li><a href="#" onclick="show('bom',this)"><span class="ico">🛒</span>BOM / Costos</a></li>
+    <li><a href="#" onclick="show('mecanico',this)"><span class="ico">📦</span>Diseño Mecánico</a></li>
+    <li><a href="#" onclick="show('pcb',this)"><span class="ico">🖥️</span>PCB Layout</a></li>
+    <li><a href="#" onclick="show('pruebas',this)"><span class="ico">🧪</span>Plan de Pruebas</a></li>
+    <li><a href="#" onclick="show('cert',this)"><span class="ico">🏅</span>Certificación</a></li>
+  </ul>
+</nav>
+<main>
+
+<!-- ===== INICIO ===== -->
+<section id="inicio" class="active">
+  <div class="hero">
+    <h2>ColPLC v1.0</h2>
+    <p>PLC industrial de diseño colombiano. 12 entradas digitales 24VDC optoacopladas, 8 salidas a relé 10A/250VAC, arquitectura escalable hasta 76 entradas y 72 salidas mediante módulos de expansión SPI.</p>
+    <div class="badges">
+      <span class="badge">STM32F407 @ 168MHz</span>
+      <span class="badge">IEC 61131-3</span>
+      <span class="badge">Modbus RTU/TCP</span>
+      <span class="badge">FreeRTOS</span>
+      <span class="badge">Riel DIN 35mm</span>
+      <span class="badge">Fabricado en Colombia</span>
+    </div>
+  </div>
+  <div class="cards">
+    <div class="card"><div class="ico2">🟢</div><div class="val">12</div><div class="lbl">Entradas Digitales 24VDC</div></div>
+    <div class="card"><div class="ico2">🔴</div><div class="val">8</div><div class="lbl">Salidas a Relé 10A/250VAC</div></div>
+    <div class="card"><div class="ico2">⚡</div><div class="val">168</div><div class="lbl">MHz — ARM Cortex-M4</div></div>
+    <div class="card"><div class="ico2">📡</div><div class="val">RS-485</div><div class="lbl">Modbus RTU base</div></div>
+    <div class="card"><div class="ico2">🔌</div><div class="val">8</div><div class="lbl">Módulos de expansión</div></div>
+    <div class="card"><div class="ico2">💰</div><div class="val">$84</div><div class="lbl">USD por unidad (10-50 uds)</div></div>
+    <div class="card"><div class="ico2">🌡️</div><div class="val">-10/+60</div><div class="lbl">°C temperatura operación</div></div>
+    <div class="card"><div class="ico2">🏔️</div><div class="val">3000</div><div class="lbl">msnm — apto para Bogotá</div></div>
+  </div>
+  <div class="info">
+    <strong>Proyecto abierto:</strong> Todos los archivos de diseño (KiCad, firmware, BOM) están disponibles en la carpeta del proyecto. Usa el menú lateral para navegar por cada sección técnica.
+  </div>
+  <h3 class="sub">Estructura del Proyecto</h3>
+  <div class="cards">
+    <div class="card"><div class="ico2">📄</div><div class="lbl"><strong>01_Documentacion</strong><br>Especificaciones, arquitectura, plan de pruebas</div></div>
+    <div class="card"><div class="ico2">🔌</div><div class="lbl"><strong>02_Esquematicos</strong><br>CPU, alimentación, entradas, salidas, comunicaciones</div></div>
+    <div class="card"><div class="ico2">🖥️</div><div class="lbl"><strong>03_PCB</strong><br>Guía de layout 4 capas, reglas EMC/EMI</div></div>
+    <div class="card"><div class="ico2">🛒</div><div class="lbl"><strong>04_BOM</strong><br>Lista de materiales con proveedores Colombia</div></div>
+    <div class="card"><div class="ico2">💾</div><div class="lbl"><strong>05_Firmware</strong><br>FreeRTOS + HAL + Runtime IEC 61131-3</div></div>
+    <div class="card"><div class="ico2">📡</div><div class="lbl"><strong>06_Comunicaciones</strong><br>Modbus RTU, expansión SPI, Ethernet, CAN</div></div>
+    <div class="card"><div class="ico2">📦</div><div class="lbl"><strong>07_Mecanico</strong><br>Gabinete DIN, etiquetado, instalación</div></div>
+    <div class="card"><div class="ico2">🏅</div><div class="lbl"><strong>08_Certificacion</strong><br>RETIE, IEC 61131-2, laboratorios Colombia</div></div>
+  </div>
+</section>
+
+<!-- ===== ESPECIFICACIONES ===== -->
+<section id="specs">
+  <h2 class="sec">📋 Especificaciones Técnicas</h2>
+  <h3 class="sub">Módulo CPU</h3>
+  <div class="tbl-wrap"><table>
+    <tr><th>Parámetro</th><th>Especificación</th></tr>
+    <tr><td>Microcontrolador</td><td>STM32F407VGT6 (ARM Cortex-M4, 168 MHz)</td></tr>
+    <tr><td>Memoria Flash</td><td>1 MB interna + 8 MB SPI Flash externa (W25Q64)</td></tr>
+    <tr><td>RAM</td><td>192 KB interna</td></tr>
+    <tr><td>RTC</td><td>Integrado con batería CR2032 de respaldo</td></tr>
+    <tr><td>Watchdog</td><td>IWDG + WWDG hardware + MAX706 externo</td></tr>
+    <tr><td>Debug</td><td>SWD (ST-Link v2) + USB DFU</td></tr>
+  </table></div>
+  <h3 class="sub">Entradas Digitales — 12 canales</h3>
+  <div class="tbl-wrap"><table>
+    <tr><th>Parámetro</th><th>Especificación</th></tr>
+    <tr><td>Tensión nominal</td><td>24 VDC</td></tr>
+    <tr><td>Rango aceptado</td><td>18 – 30 VDC</td></tr>
+    <tr><td>Corriente por entrada</td><td>~7 mA a 24V</td></tr>
+    <tr><td>Aislamiento</td><td>Optoacoplador PC817C (5 kV)</td></tr>
+    <tr><td>Tiempo de respuesta</td><td>&lt; 1 ms (filtro hardware RC)</td></tr>
+    <tr><td>Indicación</td><td>LED verde por canal</td></tr>
+    <tr><td>Protección</td><td>TVS P6KE30A + fusible PTC 100mA</td></tr>
+    <tr><td>Tipo de señal</td><td>PNP / NPN seleccionable por jumper</td></tr>
+  </table></div>
+  <h3 class="sub">Salidas a Relé — 8 canales</h3>
+  <div class="tbl-wrap"><table>
+    <tr><th>Parámetro</th><th>Especificación</th></tr>
+    <tr><td>Tipo de relé</td><td>HF115F-H-005-1ZS1 (alt: SRD-05VDC-SL-C)</td></tr>
+    <tr><td>Tensión bobina</td><td>5 VDC</td></tr>
+    <tr><td>Contacto</td><td>SPDT (NA, NC, COM)</td></tr>
+    <tr><td>Capacidad contacto</td><td>10A / 250VAC — 10A / 30VDC</td></tr>
+    <tr><td>Vida mecánica</td><td>10 millones de operaciones</td></tr>
+    <tr><td>Vida eléctrica</td><td>100.000 operaciones a carga nominal</td></tr>
+    <tr><td>Driver</td><td>ULN2803A (Darlington array 8 canales)</td></tr>
+    <tr><td>Protección bobina</td><td>Diodo flyback 1N4007</td></tr>
+  </table></div>
+  <h3 class="sub">Alimentación</h3>
+  <div class="tbl-wrap"><table>
+    <tr><th>Parámetro</th><th>Especificación</th></tr>
+    <tr><td>Entrada</td><td>24 VDC ±20% (19.2 – 28.8 V)</td></tr>
+    <tr><td>Protección entrada</td><td>Fusible 2A + diodo P600M + MOV S20K39 + TVS P6SMB33CA</td></tr>
+    <tr><td>Regulador 5V</td><td>LM2596-5.0 (buck switching, 3A, η≈77%)</td></tr>
+    <tr><td>Regulador 3.3V</td><td>AMS1117-3.3 (LDO, 1A)</td></tr>
+    <tr><td>Consumo típico</td><td>~500 mA a 24V (sin carga en salidas)</td></tr>
+    <tr><td>Consumo máximo</td><td>~1.5A a 24V (todas salidas activas)</td></tr>
+  </table></div>
+  <h3 class="sub">Condiciones Ambientales</h3>
+  <div class="tbl-wrap"><table>
+    <tr><th>Parámetro</th><th>Especificación</th></tr>
+    <tr><td>Temperatura operación</td><td>-10°C a +60°C</td></tr>
+    <tr><td>Temperatura almacenamiento</td><td>-25°C a +85°C</td></tr>
+    <tr><td>Humedad relativa</td><td>5% – 95% sin condensación</td></tr>
+    <tr><td>Altitud</td><td>Hasta 3000 msnm (apto para Bogotá)</td></tr>
+    <tr><td>Grado de protección</td><td>IP20 (gabinete DIN)</td></tr>
+    <tr><td>Vibración / Golpes</td><td>IEC 60068-2-6 / IEC 60068-2-27</td></tr>
+  </table></div>
+  <h3 class="sub">Características Mecánicas</h3>
+  <div class="tbl-wrap"><table>
+    <tr><th>Parámetro</th><th>Especificación</th></tr>
+    <tr><td>Montaje</td><td>Riel DIN 35mm (EN 60715)</td></tr>
+    <tr><td>Dimensiones</td><td>105 mm × 90 mm × 65 mm (6 módulos DIN)</td></tr>
+    <tr><td>Material carcasa</td><td>ABS V0 (autoextinguible)</td></tr>
+    <tr><td>Color</td><td>Gris RAL 7035</td></tr>
+    <tr><td>Peso</td><td>~350 g</td></tr>
+  </table></div>
+</section>
+
+<!-- ===== ARQUITECTURA ===== -->
+<section id="arquitectura">
+  <h2 class="sec">🔲 Arquitectura del Sistema</h2>
+  <h3 class="sub">Diagrama de Bloques</h3>
+  <div class="diagram">
+    <div class="blk-row">
+      <div class="blk blk-pwr">⚡ ALIMENTACIÓN<br><small>24V→5V→3.3V</small></div>
+      <div class="blk blk-cpu">🧠 CPU STM32F407<br><small>168MHz Cortex-M4</small></div>
+      <div class="blk blk-fw">💾 FLASH EXT<br><small>W25Q64 8MB</small></div>
+      <div class="blk blk-fw">🔒 WATCHDOG<br><small>MAX706</small></div>
+    </div>
+    <div class="arrow">↕ GPIO / SPI / UART</div>
+    <div class="blk-row">
+      <div class="blk blk-di">🟢 12 ENTRADAS DI<br><small>24VDC optoacopladas</small></div>
+      <div class="blk blk-do">🔴 8 SALIDAS DO<br><small>Relé 10A/250VAC</small></div>
+      <div class="blk blk-com">📡 COMUNICACIONES<br><small>RS-485 + USB</small></div>
+      <div class="blk blk-exp">🔌 BUS EXPANSIÓN<br><small>SPI IDC-20</small></div>
+    </div>
+    <div class="arrow">↓ Bus SPI + CS + INT + PWR</div>
+    <div class="blk-row">
+      <div class="blk blk-exp">EXP-8DI</div>
+      <div class="blk blk-exp">EXP-8DO</div>
+      <div class="blk blk-exp">EXP-4AI</div>
+      <div class="blk blk-exp">EXP-ETH</div>
+      <div class="blk blk-exp">EXP-CAN</div>
+      <div class="blk blk-exp">... ×8 máx</div>
+    </div>
+  </div>
+  <h3 class="sub">Arquitectura de Software (Capas)</h3>
+  <div class="layers">
+    <div class="layer l1">🎯 APLICACIÓN USUARIO — Ladder / ST / FBD (IEC 61131-3)</div>
+    <div class="layer l2">⚙️ RUNTIME PLC — Scheduler · Compilador Bytecode · Variables %I %Q %M %T %C</div>
+    <div class="layer l3">📡 SERVICIOS — Modbus RTU/TCP · Logger · Config EEPROM · Diagnóstico</div>
+    <div class="layer l4">🔧 HAL — GPIO · SPI · UART · ADC · Timer · Watchdog · Flash</div>
+    <div class="layer l5">🕐 FreeRTOS v10 — Tareas · Semáforos · Colas · Timers software</div>
+    <div class="layer l6">💻 STM32 HAL/LL + CMSIS — ARM Cortex-M4 Hardware</div>
+  </div>
+  <h3 class="sub">Mapa de Pines STM32F407VGT6</h3>
+  <div class="tbl-wrap"><table>
+    <tr><th>Función</th><th>Pin STM32</th><th>Periférico</th></tr>
+    <tr><td>DI1–DI8</td><td>PA0–PA7</td><td>GPIOA Input</td></tr>
+    <tr><td>DI9–DI12</td><td>PB0–PB3</td><td>GPIOB Input</td></tr>
+    <tr><td>DO1–DO8</td><td>PC0–PC7</td><td>GPIOC Output</td></tr>
+    <tr><td>RS485 TX/RX/DE</td><td>PD5/PD6/PD4</td><td>USART2</td></tr>
+    <tr><td>USB D+/D-</td><td>PA12/PA11</td><td>USB OTG FS</td></tr>
+    <tr><td>SPI2 (Expansión)</td><td>PB13/PB14/PB15</td><td>SPI2 SCK/MISO/MOSI</td></tr>
+    <tr><td>CS Módulos 1–8</td><td>PE0–PE7</td><td>GPIO Output</td></tr>
+    <tr><td>SPI1 (Flash)</td><td>PA5/PA6/PA7/PA4</td><td>SPI1 + CS</td></tr>
+    <tr><td>LED RUN/ERR/COM/PRG</td><td>PD12/PD13/PD14/PD15</td><td>GPIO Output</td></tr>
+    <tr><td>SWD Debug</td><td>PA13/PA14</td><td>SWDIO/SWDCLK</td></tr>
+  </table></div>
+  <h3 class="sub">Flujo de Operación — Ciclo de Scan</h3>
+  <div class="timeline">
+    <div class="tl-item"><h4>1. Encendido e Inicialización</h4><p>Configurar relojes PLL, GPIO, SPI, UART. Verificar watchdog.</p></div>
+    <div class="tl-item"><h4>2. Auto-diagnóstico (POST)</h4><p>Test RAM, test Flash, verificar módulos de expansión y comunicaciones.</p></div>
+    <div class="tl-item"><h4>3. Cargar Programa de Usuario</h4><p>Leer desde Flash externa W25Q64. Verificar CRC del programa.</p></div>
+    <div class="tl-item"><h4>4. Leer Entradas (cada ciclo)</h4><p>Leer 12 DI físicas + módulos expansión. Actualizar imagen de proceso.</p></div>
+    <div class="tl-item"><h4>5. Ejecutar Programa Usuario</h4><p>Procesar lógica Ladder/ST. Actualizar temporizadores y contadores.</p></div>
+    <div class="tl-item"><h4>6. Escribir Salidas</h4><p>Actualizar 8 DO físicas + módulos expansión.</p></div>
+    <div class="tl-item"><h4>7. Comunicaciones + Watchdog</h4><p>Procesar Modbus RTU. Reset watchdog. Tiempo ciclo típico: 1–10 ms.</p></div>
+  </div>
+</section>
+
+<!-- ===== ENTRADAS ===== -->
+<section id="entradas">
+  <h2 class="sec">🟢 Módulo de Entradas Digitales (12 canales)</h2>
+  <div class="info">12 entradas digitales optoacopladas para señales 24VDC industriales. Compatibles con sensores PNP y NPN. Protección TVS, fusible PTC autorecuperable y filtro anti-rebote hardware.</div>
+  <h3 class="sub">Circuito por Canal (DI1 — repetir ×12)</h3>
+  <pre><code>CAMPO 24VDC                              LADO CPU 3.3V
+─────────────────────────────────────────────────────
+[+24V] ──[F1 PTC 100mA]──[TVS P6KE30A]──[R1 3.3kΩ]──┐
+                                                       │
+                                               [Anodo PC817C]
+                                               [Cátodo PC817C]──[D2 1N4148]──GND_CAMPO
+                                                       │
+                                               [Colector PC817C]──[R2 10kΩ]──+3.3V
+                                                       │
+                                               GPIO STM32 (PA0=DI1)
+                                                       │
+                                               [R4 1kΩ]──[C1 10nF]──GND  ← Filtro anti-rebote</code></pre>
+  <h3 class="sub">Asignación de Pines</h3>
+  <div class="tbl-wrap"><table>
+    <tr><th>Canal</th><th>Pin STM32</th><th>Canal</th><th>Pin STM32</th></tr>
+    <tr><td>DI1</td><td>PA0</td><td>DI7</td><td>PA6</td></tr>
+    <tr><td>DI2</td><td>PA1</td><td>DI8</td><td>PA7</td></tr>
+    <tr><td>DI3</td><td>PA2</td><td>DI9</td><td>PB0</td></tr>
+    <tr><td>DI4</td><td>PA3</td><td>DI10</td><td>PB1</td></tr>
+    <tr><td>DI5</td><td>PA4</td><td>DI11</td><td>PB2</td></tr>
+    <tr><td>DI6</td><td>PA5</td><td>DI12</td><td>PB3</td></tr>
+  </table></div>
+  <h3 class="sub">Componentes por Canal (×12)</h3>
+  <div class="tbl-wrap"><table>
+    <tr><th>Ref</th><th>Componente</th><th>Modelo</th><th>Función</th></tr>
+    <tr><td>F1</td><td>Fusible PTC</td><td>MF-MSMF010-2</td><td>100mA autorecuperable</td></tr>
+    <tr><td>TVS1</td><td>Diodo TVS</td><td>P6KE30A</td><td>Protección transitorios 30V/600W</td></tr>
+    <tr><td>D2</td><td>Diodo señal</td><td>1N4148</td><td>Protección polaridad inversa</td></tr>
+    <tr><td>R1</td><td>Resistencia</td><td>3.3kΩ 1/4W</td><td>Limitador corriente LED opto</td></tr>
+    <tr><td>U1</td><td>Optoacoplador</td><td>PC817C</td><td>Aislamiento galvánico 5kV</td></tr>
+    <tr><td>R2</td><td>Resistencia</td><td>10kΩ 1/4W</td><td>Pull-up salida optoacoplador</td></tr>
+    <tr><td>LED1</td><td>LED verde 3mm</td><td>L-934GT</td><td>Indicador estado entrada</td></tr>
+  </table></div>
+  <div class="warn"><strong>Aislamiento:</strong> Mantener separación mínima 6mm entre GND_CAMPO y GND_CPU en el PCB. Considerar ranura física bajo los optoacopladores.</div>
+</section>
+
+<!-- ===== SALIDAS ===== -->
+<section id="salidas">
+  <h2 class="sec">🔴 Módulo de Salidas a Relé (8 canales)</h2>
+  <div class="info">8 salidas a relé SPDT (NA, NC, COM). Driver ULN2803A para manejo desde GPIO 3.3V del STM32. Protección flyback, indicación LED y snubber RC para cargas inductivas.</div>
+  <h3 class="sub">Circuito por Canal (DO1 — repetir ×8)</h3>
+  <pre><code>STM32 GPIO (PC0) ──[R1 1kΩ]──── IN1 ULN2803A (Pin 1)
+                                       │
+                                OUT1 ULN2803A (Pin 18)
+                                       │
+                               [Bobina Relé K1] ──── +5V
+                                       │
+                               [D1 1N4007 flyback] ──── GND
+
+Relé K1 HF115F-H-005-1ZS1:
+  COM ──── Terminal común (bornera campo)
+  NA  ──── Normalmente Abierto (bornera campo)
+  NC  ──── Normalmente Cerrado (bornera campo)
+
+Snubber RC (cargas inductivas AC):
+  [R 100Ω 1W] + [C 100nF/630V] entre COM y NA</code></pre>
+  <h3 class="sub">Asignación de Pines</h3>
+  <div class="tbl-wrap"><table>
+    <tr><th>Canal</th><th>Pin STM32</th><th>Canal</th><th>Pin STM32</th></tr>
+    <tr><td>DO1</td><td>PC0</td><td>DO5</td><td>PC4</td></tr>
+    <tr><td>DO2</td><td>PC1</td><td>DO6</td><td>PC5</td></tr>
+    <tr><td>DO3</td><td>PC2</td><td>DO7</td><td>PC6</td></tr>
+    <tr><td>DO4</td><td>PC3</td><td>DO8</td><td>PC7</td></tr>
+  </table></div>
+  <h3 class="sub">Especificaciones del Relé HF115F-H-005-1ZS1</h3>
+  <div class="tbl-wrap"><table>
+    <tr><th>Parámetro</th><th>Valor</th></tr>
+    <tr><td>Tensión bobina</td><td>5 VDC</td></tr>
+    <tr><td>Resistencia bobina</td><td>89.3 Ω — Corriente: 56 mA</td></tr>
+    <tr><td>Capacidad AC</td><td>10A / 250VAC</td></tr>
+    <tr><td>Capacidad DC</td><td>10A / 30VDC</td></tr>
+    <tr><td>Vida mecánica</td><td>10 × 10⁶ operaciones</td></tr>
+    <tr><td>Vida eléctrica</td><td>1 × 10⁵ operaciones (carga nominal)</td></tr>
+    <tr><td>Alternativa económica</td><td>SRD-05VDC-SL-C (Songle)</td></tr>
+  </table></div>
+  <div class="warn"><strong>PCB:</strong> Pistas de contacto mínimo 2mm (10A). Separación campo/CPU mínimo 8mm. Creepage distance 6mm (250VAC, Categoría II).</div>
+</section>
+
+<!-- ===== ALIMENTACION ===== -->
+<section id="alimentacion">
+  <h2 class="sec">⚡ Módulo de Alimentación</h2>
+  <div class="info">Entrada 24VDC ±20%. Dos etapas de regulación: LM2596 buck switching 5V/3A y AMS1117 LDO 3.3V/1A. Protección completa contra transitorios, inversión de polaridad y sobrecarga.</div>
+  <h3 class="sub">Diagrama de Bloques</h3>
+  <div class="diagram">
+    <div class="blk-row">
+      <div class="blk blk-pwr">24VDC ENTRADA<br><small>Bornera 7.62mm</small></div>
+    </div>
+    <div class="arrow">↓</div>
+    <div class="blk-row">
+      <div class="blk blk-fw">F1 Fusible 2A</div>
+      <div class="blk blk-fw">D1 P600M<br><small>Anti-inversión</small></div>
+      <div class="blk blk-fw">MOV S20K39<br><small>Transitorios</small></div>
+      <div class="blk blk-fw">TVS P6SMB33CA<br><small>Limitador 33V</small></div>
+    </div>
+    <div class="arrow">↓ 24V filtrado</div>
+    <div class="blk-row">
+      <div class="blk blk-pwr">LM2596-5.0<br><small>Buck 5V / 3A</small></div>
+    </div>
+    <div class="arrow">↓ +5V → Relés, ULN2803, LEDs</div>
+    <div class="blk-row">
+      <div class="blk blk-cpu">AMS1117-3.3<br><small>LDO 3.3V / 1A</small></div>
+    </div>
+    <div class="arrow">↓ +3.3V → STM32, Flash, RS-485, LEDs CPU</div>
+  </div>
+  <h3 class="sub">Componentes Clave</h3>
+  <div class="tbl-wrap"><table>
+    <tr><th>Ref</th><th>Componente</th><th>Modelo</th><th>Función</th></tr>
+    <tr><td>F1</td><td>Fusible 2A/32V</td><td>GMA 2A (5×20mm)</td><td>Protección sobrecorriente — reemplazable</td></tr>
+    <tr><td>D_POL</td><td>Diodo 6A</td><td>P600M</td><td>Protección inversión de polaridad</td></tr>
+    <tr><td>MOV1</td><td>Varistor 39V</td><td>S20K39</td><td>Absorbe transitorios de red (hasta 1kV)</td></tr>
+    <tr><td>TVS1</td><td>TVS bidireccional</td><td>P6SMB33CA</td><td>Limita tensión máxima a 33V</td></tr>
+    <tr><td>U_BUCK</td><td>Regulador buck</td><td>LM2596-5.0</td><td>5V/3A, η≈77%, f=150kHz</td></tr>
+    <tr><td>L1</td><td>Inductor 100µH/3A</td><td>SRR1260-101Y</td><td>Inductor de conmutación</td></tr>
+    <tr><td>D_BUCK</td><td>Schottky 3A/40V</td><td>1N5822</td><td>Rectificador buck</td></tr>
+    <tr><td>U_LDO</td><td>LDO 3.3V/1A</td><td>AMS1117-3.3 SOT-223</td><td>Regulador lineal — pad térmico obligatorio</td></tr>
+  </table></div>
+  <h3 class="sub">Cálculo de Potencia</h3>
+  <pre><code>Consumo típico (base sin carga):
+  STM32F407 @ 168MHz:  ~100mA × 3.3V = 330mW
+  Flash W25Q64:         ~5mA  × 3.3V =  17mW
+  RS-485 MAX485:        ~5mA  × 3.3V =  17mW
+  LEDs CPU (4×):        ~4×5mA × 3.3V = 66mW
+  TOTAL 3.3V:           ~430mW
+
+  8 relés activos:      8 × 56mA × 5V = 2.24W
+  LEDs salidas (8×):    8 × 5mA × 5V  = 200mW
+  TOTAL 5V:             ~2.44W
+
+  Potencia entrada 24V: (2.44W + 0.43W) / 0.77 ≈ 3.7W → ~155mA a 24V
+  Con margen 2×:        ~310mA típico, 1.5A máximo</code></pre>
+</section>
+<!-- ===== FIRMWARE ===== -->
+<section id="firmware">
+  <h2 class="sec">💾 Arquitectura de Firmware</h2>
+  <div class="info">FreeRTOS v10 como base RTOS. Stack completo IEC 61131-3 con soporte para Ladder, ST y FBD. HAL propio sobre STM32CubeF4. Herramientas 100% gratuitas.</div>
+
+  <h3 class="sub">Stack de Software (Capas)</h3>
+  <div class="layers">
+    <div class="layer l1">🎯 APLICACIÓN USUARIO — Ladder / ST / FBD<br><small>Almacenado en Flash externa W25Q64</small></div>
+    <div class="layer l2">⚙️ RUNTIME IEC 61131-3 — Scheduler · Compilador Bytecode · Variables %I %Q %M %T %C</div>
+    <div class="layer l3">📡 SERVICIOS — Modbus RTU/TCP · Logger Flash · Config EEPROM · Auto-diagnóstico</div>
+    <div class="layer l4">🔧 HAL ColPLC — GPIO · SPI · UART · ADC · Timer · Watchdog · Flash W25Q64</div>
+    <div class="layer l5">🕐 FreeRTOS v10.x — Tareas · Semáforos · Colas · Timers software</div>
+    <div class="layer l6">💻 STM32CubeF4 HAL/LL + CMSIS — ARM Cortex-M4 @ 168MHz</div>
+  </div>
+
+  <h3 class="sub">Tareas FreeRTOS y Prioridades</h3>
+  <div class="tbl-wrap"><table>
+    <tr><th>Tarea</th><th>Prioridad</th><th>Período</th><th>Función</th></tr>
+    <tr><td>SCAN_IO</td><td>5 (máxima)</td><td>1 ms</td><td>Lectura/escritura E/S físicas y expansión</td></tr>
+    <tr><td>PLC_RUNTIME</td><td>4</td><td>10 ms</td><td>Ejecución programa usuario IEC 61131-3</td></tr>
+    <tr><td>MODBUS</td><td>3</td><td>5 ms</td><td>Comunicación Modbus RTU por RS-485</td></tr>
+    <tr><td>EXPANSION</td><td>3</td><td>5 ms</td><td>Gestión módulos de expansión SPI</td></tr>
+    <tr><td>DIAGNOSTICS</td><td>2</td><td>1000 ms</td><td>Auto-diagnóstico, monitoreo tensiones</td></tr>
+    <tr><td>LOGGER</td><td>1</td><td>On demand</td><td>Registro de eventos en Flash</td></tr>
+  </table></div>
+
+  <h3 class="sub">Ciclo de Scan — Código C</h3>
+  <pre><code>void PLC_ScanTask(void *pvParameters) {
+    TickType_t xLastWakeTime = xTaskGetTickCount();
+    while(1) {
+        /* 1. Leer entradas */
+        PLC_ReadPhysicalInputs();    // PA0-PA7, PB0-PB3
+        PLC_ReadExpansionInputs();   // SPI2 → módulos CS1-CS8
+
+        /* 2. Ejecutar programa usuario */
+        PLC_ExecuteUserProgram();    // Runtime IEC 61131-3
+        PLC_UpdateTimers();          // TON, TOF, TP
+        PLC_UpdateCounters();        // CTU, CTD, CTUD
+
+        /* 3. Escribir salidas */
+        PLC_WritePhysicalOutputs();  // PC0-PC7
+        PLC_WriteExpansionOutputs(); // SPI2 → módulos
+
+        /* 4. Reset watchdog */
+        HAL_IWDG_Refresh(&hiwdg);
+        WDG_External_Kick();         // MAX706 → PD11
+
+        /* 5. Esperar próximo ciclo */
+        vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(10));
+    }
+}</code></pre>
+
+  <h3 class="sub">Mapa de Variables IEC 61131-3</h3>
+  <div class="tbl-wrap"><table>
+    <tr><th>Variable</th><th>Dirección</th><th>Descripción</th></tr>
+    <tr><td>Entradas físicas</td><td>%IX0.0 – %IX0.11</td><td>DI1–DI12 del módulo base</td></tr>
+    <tr><td>Salidas físicas</td><td>%QX0.0 – %QX0.7</td><td>DO1–DO8 del módulo base</td></tr>
+    <tr><td>Entradas expansión</td><td>%IX1.0 – %IX8.7</td><td>Módulos EXP 1–8 (8 DI cada uno)</td></tr>
+    <tr><td>Salidas expansión</td><td>%QX1.0 – %QX8.7</td><td>Módulos EXP 1–8 (8 DO cada uno)</td></tr>
+    <tr><td>Marcas internas</td><td>%MX0.0 – %MX99.15</td><td>1600 bits de marcas internas</td></tr>
+    <tr><td>Temporizadores</td><td>%T0 – %T99</td><td>100 temporizadores (TON/TOF/TP)</td></tr>
+    <tr><td>Contadores</td><td>%C0 – %C99</td><td>100 contadores (CTU/CTD/CTUD)</td></tr>
+    <tr><td>Registros analógicos</td><td>%IW3.0 – %IW3.3</td><td>Entradas analógicas EXP-4AI (0–32767)</td></tr>
+  </table></div>
+
+  <h3 class="sub">Estructura de Directorios del Firmware</h3>
+  <pre><code>firmware/
+├── Core/          main.c · freertos.c · stm32f4xx_it.c
+├── HAL/           hal_gpio.c · hal_spi.c · hal_uart.c · hal_flash.c
+├── PLC/           plc_io.c · plc_runtime.c · plc_timers.c · plc_expansion.c
+├── Comms/         modbus_rtu.c · modbus_tcp.c · usb_cdc.c
+├── Services/      logger.c · config.c · diagnostics.c
+└── Drivers/       STM32F4xx_HAL · CMSIS · FreeRTOS</code></pre>
+
+  <h3 class="sub">Herramientas de Desarrollo (todas gratuitas)</h3>
+  <div class="tbl-wrap"><table>
+    <tr><th>Herramienta</th><th>Uso</th><th>Costo</th></tr>
+    <tr><td>STM32CubeIDE 1.15+</td><td>IDE principal, compilador GCC ARM</td><td class="tag-rw" style="background:#dcfce7;color:#166534;padding:2px 8px;border-radius:10px;font-size:.75rem">Gratis</td></tr>
+    <tr><td>STM32CubeMX 6.x</td><td>Configuración periféricos, generador código</td><td><span class="tag-rw">Gratis</span></td></tr>
+    <tr><td>OpenPLC Editor 3.x</td><td>Programación Ladder / ST / FBD</td><td><span class="tag-rw">Gratis</span></td></tr>
+    <tr><td>OpenPLC Runtime 3.x</td><td>Runtime IEC 61131-3 en STM32</td><td><span class="tag-rw">Gratis</span></td></tr>
+    <tr><td>FreeRTOS 10.x</td><td>RTOS kernel</td><td><span class="tag-rw">Gratis</span></td></tr>
+    <tr><td>ST-Link V2</td><td>Programador/debugger SWD</td><td>~$5 USD</td></tr>
+    <tr><td>KiCad 7.x</td><td>Diseño PCB y esquemáticos</td><td><span class="tag-rw">Gratis</span></td></tr>
+  </table></div>
+
+  <h3 class="sub">Actualización de Firmware (OTA)</h3>
+  <div class="timeline">
+    <div class="tl-item"><h4>Método 1 — USB DFU</h4><p>Mantener BOOT0 alto durante encendido → STM32 entra en bootloader USB → STM32CubeProgrammer carga el nuevo .bin</p></div>
+    <div class="tl-item"><h4>Método 2 — SWD Debug</h4><p>Conectar ST-Link V2 al conector J_SWD (IDC 2×5, 1.27mm) → cargar desde STM32CubeIDE u OpenOCD</p></div>
+    <div class="tl-item"><h4>Método 3 — Modbus (futuro)</h4><p>Comando Modbus de inicio → transferir firmware en bloques 256 bytes → verificar CRC → reiniciar</p></div>
+  </div>
+</section>
+
+<!-- ===== MODBUS ===== -->
+<section id="modbus">
+  <h2 class="sec">📡 Protocolo Modbus RTU</h2>
+  <div class="info">Implementación completa Modbus RTU esclavo/maestro sobre RS-485. 8 funciones soportadas. Mapa de registros completo con E/S, temporizadores, contadores y diagnóstico del sistema.</div>
+
+  <h3 class="sub">Configuración por Defecto</h3>
+  <div class="tbl-wrap"><table>
+    <tr><th>Parámetro</th><th>Valor por defecto</th><th>Rango configurable</th></tr>
+    <tr><td>Dirección esclavo</td><td>1</td><td>1 – 247</td></tr>
+    <tr><td>Velocidad</td><td>9600 bps</td><td>1200 – 115200 bps</td></tr>
+    <tr><td>Formato</td><td>8N1</td><td>8N1 / 8E1 / 8O1</td></tr>
+    <tr><td>Modo</td><td>Esclavo</td><td>Esclavo / Maestro</td></tr>
+    <tr><td>Timeout respuesta</td><td>1000 ms</td><td>100 – 5000 ms</td></tr>
+  </table></div>
+
+  <h3 class="sub">Mapa de Coils (Función 01/05/0F)</h3>
+  <div class="tbl-wrap"><table>
+    <tr><th>Dirección</th><th>Nombre</th><th>Acceso</th><th>Descripción</th></tr>
+    <tr><td>0x0000–0x000B</td><td>DI1–DI12</td><td><span class="tag-r">R</span></td><td>Estado entradas digitales físicas</td></tr>
+    <tr><td>0x0064–0x006B</td><td>DO1–DO8</td><td><span class="tag-rw">R/W</span></td><td>Control salidas a relé</td></tr>
+    <tr><td>0x00C8–0x012B</td><td>M0–M99</td><td><span class="tag-rw">R/W</span></td><td>Marcas internas del programa</td></tr>
+  </table></div>
+
+  <h3 class="sub">Mapa de Holding Registers (Función 03/06/10)</h3>
+  <div class="tbl-wrap"><table>
+    <tr><th>Dirección</th><th>Nombre</th><th>Acceso</th><th>Descripción</th><th>Unidad</th></tr>
+    <tr><td>0x0000</td><td>MODBUS_ADDR</td><td><span class="tag-rw">R/W</span></td><td>Dirección Modbus del PLC</td><td>1–247</td></tr>
+    <tr><td>0x0001</td><td>BAUD_RATE</td><td><span class="tag-rw">R/W</span></td><td>0=9600 / 1=19200 / 2=38400 / 3=115200</td><td>—</td></tr>
+    <tr><td>0x0002</td><td>PLC_MODE</td><td><span class="tag-rw">R/W</span></td><td>0=STOP / 1=RUN / 2=RESET</td><td>—</td></tr>
+    <tr><td>0x0003</td><td>FW_VERSION</td><td><span class="tag-r">R</span></td><td>Versión firmware (0x0100 = v1.0)</td><td>—</td></tr>
+    <tr><td>0x0005</td><td>STATUS_WORD</td><td><span class="tag-r">R</span></td><td>Palabra de estado (8 bits de flags)</td><td>—</td></tr>
+    <tr><td>0x0006</td><td>SCAN_TIME</td><td><span class="tag-r">R</span></td><td>Tiempo de ciclo actual</td><td>ms</td></tr>
+    <tr><td>0x000A</td><td>V_24V</td><td><span class="tag-r">R</span></td><td>Tensión entrada 24V × 100</td><td>mV</td></tr>
+    <tr><td>0x000B</td><td>V_5V</td><td><span class="tag-r">R</span></td><td>Tensión regulador 5V × 100</td><td>mV</td></tr>
+    <tr><td>0x000C</td><td>TEMP_CPU</td><td><span class="tag-r">R</span></td><td>Temperatura sensor interno STM32</td><td>°C</td></tr>
+    <tr><td>0x0064–0x00C7</td><td>T0–T99 PRESET</td><td><span class="tag-rw">R/W</span></td><td>Presets de temporizadores</td><td>ms</td></tr>
+    <tr><td>0x012C–0x018F</td><td>C0–C99 PRESET</td><td><span class="tag-rw">R/W</span></td><td>Presets de contadores</td><td>—</td></tr>
+  </table></div>
+
+  <h3 class="sub">Bits de STATUS_WORD (0x0005)</h3>
+  <div class="leds">
+    <div class="led-item"><div class="led-dot led-run"></div><span>Bit 0: RUN — PLC en ejecución</span></div>
+    <div class="led-item"><div class="led-dot led-err"></div><span>Bit 1: STOP — PLC detenido</span></div>
+    <div class="led-item"><div class="led-dot led-err"></div><span>Bit 2: ERROR — Fallo programa</span></div>
+    <div class="led-item"><div class="led-dot led-com"></div><span>Bit 3: COMM_OK — Modbus activo</span></div>
+    <div class="led-item"><div class="led-dot led-run"></div><span>Bit 4: WDG_OK — Watchdog OK</span></div>
+    <div class="led-item"><div class="led-dot led-prg"></div><span>Bit 5: PROG_OK — Programa cargado</span></div>
+    <div class="led-item"><div class="led-dot led-prg"></div><span>Bit 6: EXP_OK — Módulos expansión OK</span></div>
+    <div class="led-item"><div class="led-dot led-com"></div><span>Bit 7: BATT_OK — Batería RTC OK</span></div>
+  </div>
+
+  <h3 class="sub">Ejemplos de Tramas</h3>
+  <pre><code>── LEER ENTRADAS DI1–DI12 (Función 02) ──────────────────────────
+Petición:   01 02 00 00 00 0C C0 09
+            │  │  ├──addr─┤ ├─qty─┤ ├─CRC─┤
+Respuesta:  01 02 02 FF 0F 7A 8D
+            Datos: FF 0F → todas las 12 entradas activas
+
+── ACTIVAR SALIDA DO1 (Función 05) ──────────────────────────────
+Petición:   01 05 00 64 FF 00 CC 3B
+            Dirección 0x0064 = DO1 → valor 0xFF00 = ON
+Respuesta:  01 05 00 64 FF 00 CC 3B  (eco)
+
+── LEER TENSIÓN 24V (Función 03) ────────────────────────────────
+Petición:   01 03 00 0A 00 01 A4 08
+            Registro 0x000A = V_24V, leer 1 registro
+Respuesta:  01 03 02 09 60 B8 FA
+            0x0960 = 2400 → 24.00V</code></pre>
+
+  <h3 class="sub">Red RS-485 — Topología Recomendada</h3>
+  <pre><code>[SCADA / HMI] ──[120Ω]── [ColPLC #1] ── [ColPLC #2] ── [ColPLC #n] ──[120Ω]
+
+Reglas:
+  ● Máximo 32 dispositivos por segmento (sin repetidor)
+  ● Longitud máxima: 1200 m a 9600 bps
+  ● Cable: par trenzado apantallado (Belden 9841 o equivalente)
+  ● Terminación: 120Ω en ambos extremos del bus
+  ● Pantalla: conectar a tierra en un solo punto</code></pre>
+
+  <h3 class="sub">Software Compatible</h3>
+  <div class="tbl-wrap"><table>
+    <tr><th>Software</th><th>Plataforma</th><th>Uso</th><th>Costo</th></tr>
+    <tr><td>QModMaster</td><td>Win/Linux</td><td>Maestro Modbus para pruebas</td><td><span class="tag-rw">Gratis</span></td></tr>
+    <tr><td>OpenPLC Editor</td><td>Win/Linux</td><td>Programación Ladder/ST/FBD</td><td><span class="tag-rw">Gratis</span></td></tr>
+    <tr><td>ScadaBR</td><td>Win/Linux</td><td>SCADA completo con Modbus</td><td><span class="tag-rw">Gratis</span></td></tr>
+    <tr><td>Node-RED</td><td>Win/Linux</td><td>Integración IoT y dashboards</td><td><span class="tag-rw">Gratis</span></td></tr>
+    <tr><td>Ignition (trial)</td><td>Win/Linux</td><td>SCADA industrial completo</td><td>Trial gratis</td></tr>
+    <tr><td>Modbus Poll</td><td>Windows</td><td>Diagnóstico y pruebas avanzadas</td><td>$129 USD</td></tr>
+  </table></div>
+</section>
+
+<!-- ===== EXPANSION ===== -->
+<section id="expansion">
+  <h2 class="sec">🔌 Módulos de Expansión</h2>
+  <div class="info">Bus SPI propietario IDC-20. Hasta 8 módulos simultáneos con identificación automática al encendido. Escalable de 12+8 E/S base hasta 76 entradas y 72 salidas digitales.</div>
+
+  <h3 class="sub">Catálogo de Módulos</h3>
+  <div class="tbl-wrap"><table>
+    <tr><th>Código</th><th>Descripción</th><th>E/S</th><th>Ancho DIN</th><th>Conector</th></tr>
+    <tr><td><strong>EXP-8DI</strong></td><td>8 entradas digitales 24VDC</td><td>8 DI</td><td>35 mm</td><td>Bornera 16 pines</td></tr>
+    <tr><td><strong>EXP-8DO-R</strong></td><td>8 salidas a relé 10A/250VAC</td><td>8 DO</td><td>35 mm</td><td>Bornera 24 pines</td></tr>
+    <tr><td><strong>EXP-8DO-T</strong></td><td>8 salidas transistor NPN 0.5A</td><td>8 DO</td><td>35 mm</td><td>Bornera 16 pines</td></tr>
+    <tr><td><strong>EXP-4AI</strong></td><td>4 entradas analógicas 0-10V / 4-20mA</td><td>4 AI</td><td>35 mm</td><td>Bornera 8 pines</td></tr>
+    <tr><td><strong>EXP-2AO</strong></td><td>2 salidas analógicas 0-10V / 4-20mA</td><td>2 AO</td><td>35 mm</td><td>Bornera 4 pines</td></tr>
+    <tr><td><strong>EXP-ETH</strong></td><td>Ethernet W5500 Modbus TCP</td><td>—</td><td>35 mm</td><td>RJ45</td></tr>
+    <tr><td><strong>EXP-CAN</strong></td><td>CAN 2.0B / CANopen TJA1050</td><td>—</td><td>35 mm</td><td>Bornera 3 pines</td></tr>
+    <tr><td><strong>EXP-232</strong></td><td>RS-232 adicional para HMI</td><td>—</td><td>17.5 mm</td><td>DB9 macho</td></tr>
+  </table></div>
+
+  <h3 class="sub">Capacidad Máxima del Sistema</h3>
+  <div class="cards">
+    <div class="card"><div class="ico2">🟢</div><div class="val">76</div><div class="lbl">Entradas digitales máx.<br><small>12 base + 8×8 EXP-8DI</small></div></div>
+    <div class="card"><div class="ico2">🔴</div><div class="val">72</div><div class="lbl">Salidas digitales máx.<br><small>8 base + 8×8 EXP-8DO</small></div></div>
+    <div class="card"><div class="ico2">📊</div><div class="val">32</div><div class="lbl">Entradas analógicas máx.<br><small>8× EXP-4AI</small></div></div>
+    <div class="card"><div class="ico2">📡</div><div class="val">3</div><div class="lbl">Redes simultáneas<br><small>RS-485 + ETH + CAN</small></div></div>
+  </div>
+
+  <h3 class="sub">Bus de Expansión SPI — Especificaciones</h3>
+  <div class="tbl-wrap"><table>
+    <tr><th>Parámetro</th><th>Valor</th></tr>
+    <tr><td>Interfaz física</td><td>SPI modo 0 (CPOL=0, CPHA=0)</td></tr>
+    <tr><td>Velocidad</td><td>10 MHz máximo</td></tr>
+    <tr><td>Conector</td><td>IDC-20 pines, paso 2.54mm</td></tr>
+    <tr><td>Tensión señales</td><td>3.3V (STM32)</td></tr>
+    <tr><td>Alimentación módulos</td><td>+5V desde módulo base</td></tr>
+    <tr><td>Distancia máxima</td><td>30 cm (backplane) / 1 m (cable plano)</td></tr>
+    <tr><td>Módulos simultáneos</td><td>Hasta 8 (CS0–CS7 desde PE0–PE7)</td></tr>
+  </table></div>
+
+  <h3 class="sub">Trama del Protocolo SPI (16 bits)</h3>
+  <pre><code>Comando (CPU → Módulo):
+  Byte 1: [CMD 7:4][ADDR 3:0]   CMD: 0x1=LeerES 0x2=EscribirSalidas 0xF=Identificar
+  Byte 2: [DATA 7:0]
+
+Respuesta (Módulo → CPU):
+  Byte 1: [STATUS 7:4][TYPE 3:0]  STATUS: 0x0=OK 0x1=Error 0xF=Ausente
+  Byte 2: [DATA 7:0]
+
+TYPE:  0x1=EXP-8DI  0x2=EXP-8DO-R  0x3=EXP-8DO-T
+       0x4=EXP-4AI  0x5=EXP-2AO    0x6=EXP-ETH  0x7=EXP-CAN</code></pre>
+
+  <h3 class="sub">Identificación Automática al Encendido</h3>
+  <pre><code>void PLC_DetectExpansionModules(void) {
+    for(int slot = 0; slot &lt; 8; slot++) {
+        CS_Select(slot);                                 // PE0–PE7
+        uint8_t resp = SPI_SendCommand(CMD_IDENTIFY, 0);
+        CS_Deselect(slot);
+        if((resp >> 4) == STATUS_OK) {
+            modules[slot].present = true;
+            modules[slot].type    = resp & 0x0F;
+            PLC_AssignModuleVariables(slot, modules[slot].type);
+            // %IX[slot+1].0 para EXP-8DI en slot 1
+        }
+    }
+}</code></pre>
+
+  <h3 class="sub">Módulo EXP-4AI — Entradas Analógicas</h3>
+  <div class="tbl-wrap"><table>
+    <tr><th>Parámetro</th><th>Valor</th></tr>
+    <tr><td>Resolución ADC</td><td>16 bits (ADS1115) o 12 bits (MCP3204)</td></tr>
+    <tr><td>Modos de entrada</td><td>0–10V o 4–20mA (jumper por canal)</td></tr>
+    <tr><td>Precisión</td><td>±0.5% fondo de escala</td></tr>
+    <tr><td>Tiempo de muestreo</td><td>1 ms por canal</td></tr>
+    <tr><td>Protección</td><td>±30V (tensión) / ±30mA (corriente)</td></tr>
+    <tr><td>Variable IEC</td><td>%IW3.0 – %IW3.3 → 0–32767</td></tr>
+  </table></div>
+
+  <h3 class="sub">Módulo EXP-ETH — Ethernet Modbus TCP</h3>
+  <div class="tbl-wrap"><table>
+    <tr><th>Parámetro</th><th>Valor</th></tr>
+    <tr><td>Chip</td><td>W5500 (WIZnet) vía SPI3 del STM32</td></tr>
+    <tr><td>Velocidad</td><td>10/100 Mbps auto-negociación</td></tr>
+    <tr><td>Protocolo</td><td>Modbus TCP puerto 502</td></tr>
+    <tr><td>Conexiones</td><td>Hasta 4 clientes simultáneos</td></tr>
+    <tr><td>IP</td><td>DHCP o estática (registros 0x0200–0x020D)</td></tr>
+    <tr><td>Conector</td><td>RJ45 con LEDs LINK/ACT integrados</td></tr>
+  </table></div>
+</section>
+
+<!-- ===== BOM ===== -->
+<section id="bom">
+  <h2 class="sec">🛒 BOM — Lista de Materiales y Costos</h2>
+  <div class="info">Costo estimado <strong>~$84 USD</strong> por unidad en lotes de 10–50 unidades (TRM referencia $4,150 COP/USD, Mayo 2026). Componentes con disponibilidad en Bogotá y Medellín.</div>
+
+  <h3 class="sub">Resumen de Costos por Módulo</h3>
+  <div class="cost-bar"><span class="lbl2">Gabinete DIN</span><div class="bar"><div class="fill" style="width:100%"></div></div><span class="val2">$15.00</span></div>
+  <div class="cost-bar"><span class="lbl2">CPU y memoria</span><div class="bar"><div class="fill" style="width:87%"></div></div><span class="val2">$18.00</span></div>
+  <div class="cost-bar"><span class="lbl2">PCB (lote 10 uds)</span><div class="bar"><div class="fill" style="width:74%"></div></div><span class="val2">$8.00</span></div>
+  <div class="cost-bar"><span class="lbl2">Conectores/borneras</span><div class="bar"><div class="fill" style="width:60%"></div></div><span class="val2">$9.00</span></div>
+  <div class="cost-bar"><span class="lbl2">Salidas relé</span><div class="bar"><div class="fill" style="width:80%"></div></div><span class="val2">$12.00</span></div>
+  <div class="cost-bar"><span class="lbl2">Entradas digitales</span><div class="bar"><div class="fill" style="width:57%"></div></div><span class="val2">$8.50</span></div>
+  <div class="cost-bar"><span class="lbl2">Alimentación</span><div class="bar"><div class="fill" style="width:40%"></div></div><span class="val2">$6.00</span></div>
+  <div class="cost-bar"><span class="lbl2">Comunicaciones</span><div class="bar"><div class="fill" style="width:30%"></div></div><span class="val2">$4.50</span></div>
+  <div class="cost-bar"><span class="lbl2">Pasivos (R, C, L)</span><div class="bar"><div class="fill" style="width:20%"></div></div><span class="val2">$3.00</span></div>
+  <br>
+  <div class="ok"><strong>TOTAL: ~$84 USD / unidad ≈ $348,500 COP</strong> (lote 10–50 unidades)</div>
+
+  <h3 class="sub">BOM Módulo CPU</h3>
+  <div class="tbl-wrap"><table>
+    <tr><th>Ref</th><th>Descripción</th><th>Modelo</th><th>Cant</th><th>USD</th><th>Proveedor</th></tr>
+    <tr><td>U1</td><td>Microcontrolador ARM Cortex-M4</td><td>STM32F407VGT6</td><td>1</td><td>$8.50</td><td>Mouser/DigiKey</td></tr>
+    <tr><td>U2</td><td>Flash SPI 8MB</td><td>W25Q64JVSIQ</td><td>1</td><td>$0.80</td><td>Mouser/DigiKey</td></tr>
+    <tr><td>U3</td><td>Watchdog externo</td><td>MAX706TESA</td><td>1</td><td>$1.20</td><td>Mouser/DigiKey</td></tr>
+    <tr><td>Y1</td><td>Cristal 8MHz</td><td>HC-49S 8MHz</td><td>1</td><td>$0.30</td><td>Mouser/DigiKey</td></tr>
+    <tr><td>Y2</td><td>Cristal RTC 32.768kHz</td><td>CM315 32.768kHz</td><td>1</td><td>$0.25</td><td>Mouser/DigiKey</td></tr>
+    <tr><td>BT1</td><td>Batería RTC + holder</td><td>CR2032</td><td>1</td><td>$0.50</td><td>Mercado local</td></tr>
+    <tr><td>J_USB</td><td>Conector Mini-USB B</td><td>USB-B-S-RA</td><td>1</td><td>$0.40</td><td>Mouser/DigiKey</td></tr>
+    <tr><td>U_ESD</td><td>Protección ESD USB</td><td>USBLC6-2SC6</td><td>1</td><td>$0.30</td><td>Mouser/DigiKey</td></tr>
+  </table></div>
+
+  <h3 class="sub">BOM Entradas Digitales (×12 canales)</h3>
+  <div class="tbl-wrap"><table>
+    <tr><th>Ref</th><th>Componente</th><th>Modelo</th><th>Cant</th><th>USD total</th><th>Proveedor</th></tr>
+    <tr><td>OPT1–12</td><td>Optoacoplador 5kV</td><td>PC817C</td><td>12</td><td>$1.80</td><td>Mercado local</td></tr>
+    <tr><td>TVS1–12</td><td>TVS 30V 600W</td><td>P6KE30A</td><td>12</td><td>$1.20</td><td>Mouser/DigiKey</td></tr>
+    <tr><td>F_IN1–12</td><td>Fusible PTC 100mA</td><td>MF-MSMF010-2</td><td>12</td><td>$1.80</td><td>Mouser/DigiKey</td></tr>
+    <tr><td>J_DI</td><td>Bornera 24 pines campo</td><td>MSTB 2.5/24-ST</td><td>1</td><td>$3.50</td><td>Phoenix/Wago</td></tr>
+  </table></div>
+
+  <h3 class="sub">BOM Salidas a Relé (×8 canales)</h3>
+  <div class="tbl-wrap"><table>
+    <tr><th>Ref</th><th>Componente</th><th>Modelo</th><th>Cant</th><th>USD total</th><th>Proveedor</th></tr>
+    <tr><td>K1–K8</td><td>Relé SPDT 5VDC 10A</td><td>HF115F-H-005-1ZS1</td><td>8</td><td>$6.40</td><td>Mercado local</td></tr>
+    <tr><td>U_DRV</td><td>Driver Darlington 8ch</td><td>ULN2803ADWR</td><td>1</td><td>$0.50</td><td>Mouser/DigiKey</td></tr>
+    <tr><td>D_FLY1–8</td><td>Diodo flyback</td><td>1N4007</td><td>8</td><td>$0.16</td><td>Mercado local</td></tr>
+    <tr><td>J_DO</td><td>Bornera 24 pines campo</td><td>MSTB 2.5/24-ST</td><td>1</td><td>$3.50</td><td>Phoenix/Wago</td></tr>
+  </table></div>
+
+  <h3 class="sub">Alternativas de Componentes (Colombia)</h3>
+  <div class="tbl-wrap"><table>
+    <tr><th>Componente</th><th>Modelo principal</th><th>Alternativa 1</th><th>Alternativa 2</th></tr>
+    <tr><td>Microcontrolador</td><td>STM32F407VGT6</td><td>STM32F405RGT6</td><td>STM32F407IGT6</td></tr>
+    <tr><td>Relé 5V 10A</td><td>HF115F-H-005-1ZS1</td><td>SRD-05VDC-SL-C</td><td>JQC-3FF-S-Z</td></tr>
+    <tr><td>Optoacoplador</td><td>PC817C</td><td>EL817C</td><td>4N35</td></tr>
+    <tr><td>Regulador buck</td><td>LM2596-5.0</td><td>XL4016</td><td>LM2576-5.0</td></tr>
+    <tr><td>Regulador LDO</td><td>AMS1117-3.3</td><td>LD1117-3.3</td><td>LM1117-3.3</td></tr>
+    <tr><td>Transceptor RS-485</td><td>MAX485CSA+</td><td>SN75176B</td><td>SP485</td></tr>
+    <tr><td>Driver relés</td><td>ULN2803ADWR</td><td>TD62083</td><td>MC1413</td></tr>
+    <tr><td>Flash SPI</td><td>W25Q64JVSIQ</td><td>AT25SF641</td><td>MX25L6406E</td></tr>
+  </table></div>
+
+  <h3 class="sub">Proveedores Recomendados en Colombia</h3>
+  <div class="cards">
+    <div class="card"><div class="ico2">🏪</div><strong>Bogotá</strong><br><br><small>Electronilab (electronilab.co)<br>Sigma Electrónica<br>Districomp</small></div>
+    <div class="card"><div class="ico2">🏪</div><strong>Medellín</strong><br><br><small>Electrónica Siglo XXI<br>Ingelectra<br>Almacén Electrónico</small></div>
+    <div class="card"><div class="ico2">🌐</div><strong>Online (importado)</strong><br><br><small>Mouser Electronics<br>DigiKey<br>AliExpress (solo prototipos)</small></div>
+    <div class="card"><div class="ico2">🔌</div><strong>Borneras y conectores</strong><br><br><small>Phoenix Contact<br>Wago<br>Dinkle (económico)</small></div>
+    <div class="card"><div class="ico2">🖥️</div><strong>PCB</strong><br><br><small>JLCPCB (importado)<br>PCBWay (importado)<br>Fabricante local (cotizar)</small></div>
+  </div>
+</section>
+
+<!-- ===== MECANICO ===== -->
+<section id="mecanico">
+  <h2 class="sec">📦 Diseño Mecánico</h2>
+
+  <h3 class="sub">Dimensiones del Módulo Base</h3>
+  <div class="cards">
+    <div class="card"><div class="ico2">↔️</div><div class="val">105 mm</div><div class="lbl">Ancho (6 módulos DIN)</div></div>
+    <div class="card"><div class="ico2">↕️</div><div class="val">90 mm</div><div class="lbl">Alto</div></div>
+    <div class="card"><div class="ico2">📐</div><div class="val">65 mm</div><div class="lbl">Profundidad</div></div>
+    <div class="card"><div class="ico2">⚖️</div><div class="val">~350 g</div><div class="lbl">Peso total</div></div>
+  </div>
+
+  <h3 class="sub">Vista Frontal del Panel</h3>
+  <pre><code>┌─────────────────────────────────────────────────────────────────┐
+│  ColPLC v1.0                          ● RUN  ● ERR  ● COM  ● PRG│
+│                                                                  │
+│  ENTRADAS DIGITALES 24VDC                                        │
+│  ┌──────────────────────────────────────────────────────────┐   │
+│  │  DI1  DI2  DI3  DI4  DI5  DI6  DI7  DI8  DI9 DI10 DI11 DI12│
+│  │   ●    ●    ●    ●    ●    ●    ●    ●    ●    ●    ●    ●  │
+│  │  [+][-][+][-][+][-][+][-][+][-][+][-][+][-][+][-] ...       │
+│  └──────────────────────────────────────────────────────────┘   │
+│                                                                  │
+│  SALIDAS A RELÉ 10A/250VAC                                       │
+│  ┌──────────────────────────────────────────────────────────┐   │
+│  │  DO1    DO2    DO3    DO4    DO5    DO6    DO7    DO8     │   │
+│  │   ●      ●      ●      ●      ●      ●      ●      ●    │   │
+│  │ [C][A][N][C][A][N][C][A][N][C][A][N][C][A][N][C][A][N]  │   │
+│  └──────────────────────────────────────────────────────────┘   │
+│                                                                  │
+│  [RS485/DB9]  [USB]  [24V+]  [24V-]  [FUSE]     [EXP ▶]       │
+└─────────────────────────────────────────────────────────────────┘
+  ←───────────── 105 mm ──────────────→   Alto: 90 mm</code></pre>
+
+  <h3 class="sub">Indicadores LED de Estado</h3>
+  <div class="leds">
+    <div class="led-item"><div class="led-dot led-run"></div><strong>RUN</strong> — Verde: PLC en ejecución normal</div>
+    <div class="led-item"><div class="led-dot led-err"></div><strong>ERR</strong> — Rojo: Fallo en programa o hardware</div>
+    <div class="led-item"><div class="led-dot led-com"></div><strong>COM</strong> — Amarillo: Comunicación Modbus activa</div>
+    <div class="led-item"><div class="led-dot led-prg"></div><strong>PRG</strong> — Azul: Modo programación / USB conectado</div>
+  </div>
+
+  <h3 class="sub">Carcasa Recomendada</h3>
+  <div class="tbl-wrap"><table>
+    <tr><th>Opción</th><th>Modelo</th><th>Material</th><th>Precio aprox.</th><th>Observación</th></tr>
+    <tr><td>Producción</td><td>Bopla Bocube B 106009 GR</td><td>ABS V0</td><td>$12–15 USD</td><td>Clip DIN + ventanas LED integrados</td></tr>
+    <tr><td>Económica</td><td>Gainta G203C</td><td>ABS</td><td>$6–8 USD</td><td>Dimensiones similares</td></tr>
+    <tr><td>Prototipo</td><td>Impresión 3D PETG/ABS</td><td>PETG/ABS</td><td>&lt;$3 USD</td><td>No certificable para producción industrial</td></tr>
+  </table></div>
+
+  <h3 class="sub">Expansión Mecánica en Riel DIN</h3>
+  <pre><code>Módulo base (105 mm) + hasta 8 módulos de expansión (35 mm c/u):
+
+[ColPLC Base 105mm][EXP-8DI 35mm][EXP-8DO 35mm][EXP-4AI 35mm][EXP-ETH 35mm]...
+
+Longitud máxima con 8 módulos:
+  105 mm + (8 × 35 mm) = 385 mm en riel DIN
+
+Conexión entre módulos:
+  ● Conector lateral IDC-20 (bus expansión)
+  ● Guía de alineación plástica
+  ● Sin tornillos — conexión por presión</code></pre>
+
+  <h3 class="sub">Consideraciones de Instalación</h3>
+  <ul class="checklist">
+    <li>Orientación vertical recomendada (mejor ventilación natural)</li>
+    <li>Espacio libre mínimo: 25mm superior e inferior, 10mm laterales</li>
+    <li>Temperatura ambiente máxima: +60°C (hasta +70°C con ventilación forzada)</li>
+    <li>Mínimo 50mm de separación de transformadores y resistencias de potencia</li>
+    <li>Mínimo 100mm de variadores de frecuencia (EMI)</li>
+    <li>Cables de campo y de potencia: máximo 2.5mm²</li>
+    <li>Canaleta separada para cables de señal y cables de potencia</li>
+    <li class="warn-item">No montar en orientación invertida (calor acumulado en componentes)</li>
+  </ul>
+</section>
+
+<!-- ===== PCB ===== -->
+<section id="pcb">
+  <h2 class="sec">🖥️ Guía de Layout PCB</h2>
+  <div class="info">PCB de 4 capas, 160×100mm, FR4 Tg150°C. Zonificación estricta para separar campo (24V/AC) de CPU (3.3V). Cumple IEC 60664-1 para 250VAC Categoría II.</div>
+
+  <h3 class="sub">Stack de Capas</h3>
+  <div class="tbl-wrap"><table>
+    <tr><th>Capa</th><th>Función</th><th>Descripción</th></tr>
+    <tr><td><strong>Capa 1 (TOP)</strong></td><td>Señales + Componentes</td><td>Pistas de señal, componentes SMD, pads THT</td></tr>
+    <tr><td><strong>Capa 2 (GND)</strong></td><td>Plano de Tierra Sólido</td><td>GND continuo sin cortes — referencia de todo el circuito</td></tr>
+    <tr><td><strong>Capa 3 (PWR)</strong></td><td>Planos de Alimentación</td><td>Plano +3.3V (zona CPU) + plano +5V (zona relés)</td></tr>
+    <tr><td><strong>Capa 4 (BOTTOM)</strong></td><td>Señales secundarias</td><td>Pistas adicionales, componentes THT, borneras</td></tr>
+  </table></div>
+
+  <h3 class="sub">Zonificación del PCB</h3>
+  <pre><code>┌─────────────────────────────────────────────────────────────────┐  160×100mm
+│  ┌─────────────────┐  ┌──────────────────────────────────────┐  │
+│  │  ZONA           │  │          ZONA CPU                    │  │
+│  │  ALIMENTACIÓN   │  │  STM32F407  W25Q64  MAX706  LEDs    │  │
+│  │  LM2596         │  │  ┌────────────────────────────────┐  │  │
+│  │  AMS1117        │  │  │    ZONA COMUNICACIONES          │  │  │
+│  │  MOV/TVS/Fuse   │  │  │  MAX485  USB  W5500(opt)       │  │  │
+│  └─────────────────┘  │  └────────────────────────────────┘  │  │
+│                       └──────────────────────────────────────┘  │
+│  ═══════════════ BARRERA DE AISLAMIENTO (6–8mm) ═══════════════  │
+│  ┌──────────────────────────────┐  ┌──────────────────────────┐  │
+│  │  ZONA ENTRADAS DIGITALES     │  │  ZONA SALIDAS RELÉ       │  │
+│  │  PC817×12  TVS×12  LED×12   │  │  K1-K8  ULN2803  LED×8  │  │
+│  │  Borneras DI1–DI12           │  │  Borneras DO1–DO8        │  │
+│  └──────────────────────────────┘  └──────────────────────────┘  │
+│  [J_PWR] [J_RS485] [J_USB] [J_EXP] [J_SWD]  ← Borde inferior   │
+└─────────────────────────────────────────────────────────────────┘</code></pre>
+
+  <h3 class="sub">Reglas de Enrutamiento por Zona</h3>
+  <div class="tbl-wrap"><table>
+    <tr><th>Zona</th><th>Ancho mínimo pista</th><th>Separación</th><th>Notas especiales</th></tr>
+    <tr><td>CPU / señales 3.3V</td><td>0.2 mm</td><td>0.2 mm</td><td>SPI longitudes iguales ±5mm</td></tr>
+    <tr><td>Alimentación 5V</td><td>2.0 mm</td><td>0.3 mm</td><td>Inductor LM2596 pistas cortas y anchas</td></tr>
+    <tr><td>Alimentación 3.3V</td><td>1.0 mm</td><td>0.3 mm</td><td>Pad térmico AMS1117 soldado completo</td></tr>
+    <tr><td>Alimentación 24V</td><td>3.0 mm</td><td>0.5 mm</td><td>Entrada hasta fusible</td></tr>
+    <tr><td>Campo 24VDC (DI)</td><td>1.0 mm</td><td>6 mm a CPU</td><td>Ranura PCB bajo optoacopladores</td></tr>
+    <tr><td>Campo 250VAC (DO)</td><td>2.0 mm</td><td>8 mm a CPU</td><td>Clearance 3mm / Creepage 6mm mínimo</td></tr>
+    <tr><td>USB D+/D-</td><td>0.3 mm</td><td>90Ω diferencial</td><td>Sin vías, sin ángulos 90°, longitud igual</td></tr>
+  </table></div>
+
+  <h3 class="sub">Especificaciones de Fabricación</h3>
+  <div class="tbl-wrap"><table>
+    <tr><th>Parámetro</th><th>Valor</th></tr>
+    <tr><td>Dimensiones</td><td>160 mm × 100 mm</td></tr>
+    <tr><td>Capas</td><td>4 capas</td></tr>
+    <tr><td>Material</td><td>FR4, Tg 150°C</td></tr>
+    <tr><td>Espesor PCB</td><td>1.6 mm</td></tr>
+    <tr><td>Espesor cobre</td><td>35µm (1oz) externas / 17.5µm internas</td></tr>
+    <tr><td>Acabado superficial</td><td>HASL sin plomo (prototipo) / ENIG (producción)</td></tr>
+    <tr><td>Tamaño mínimo vía</td><td>0.3 mm taladro / 0.6 mm pad</td></tr>
+    <tr><td>Máscara soldadura</td><td>Verde (o azul para diferenciación de lotes)</td></tr>
+    <tr><td>Fabricante recomendado</td><td>JLCPCB o PCBWay (importado, precio competitivo)</td></tr>
+  </table></div>
+
+  <h3 class="sub">Checklist Pre-fabricación</h3>
+  <ul class="checklist">
+    <li>DRC (Design Rule Check) sin errores en KiCad</li>
+    <li>ERC (Electrical Rule Check) sin errores</li>
+    <li>Footprints verificados contra datasheet de cada componente</li>
+    <li>Distancias de aislamiento campo/CPU verificadas (6–8mm)</li>
+    <li>Condensadores de desacoplamiento 100nF en cada pin VDD del STM32</li>
+    <li>Plano de tierra capa 2 continuo (sin cortes)</li>
+    <li>Pistas de potencia con ancho correcto (2mm mínimo para 10A)</li>
+    <li>Archivos Gerber revisados en visor externo antes de enviar</li>
+    <li class="warn-item">Confirmar stack de capas y material con el fabricante antes de pedir</li>
+  </ul>
+</section>
+
+<!-- ===== PRUEBAS ===== -->
+<section id="pruebas">
+  <h2 class="sec">🧪 Plan de Pruebas</h2>
+  <div class="info">5 pruebas de prototipo + 6 pruebas de producción al 100% (cada unidad fabricada) + pruebas de lote (1 de cada 10 unidades). Registro formal por número de serie.</div>
+
+  <h3 class="sub">Pruebas de Producción — 100% (cada unidad)</h3>
+  <div class="tbl-wrap"><table>
+    <tr><th>Código</th><th>Prueba</th><th>Criterio de aceptación</th></tr>
+    <tr><td><strong>PT-001</strong></td><td>Verificación visual (soldadura IPC-A-610 Clase 2)</td><td>Sin puentes, polaridades correctas, etiquetado OK</td></tr>
+    <tr><td><strong>PT-002</strong></td><td>Alimentación 24VDC</td><td>+5V: 4.75–5.25V / +3.3V: 3.2–3.4V / I&lt;200mA vacío</td></tr>
+    <tr><td><strong>PT-003</strong></td><td>Entradas digitales DI1–DI12</td><td>LED enciende, coil Modbus=1, respuesta &lt;5ms</td></tr>
+    <tr><td><strong>PT-004</strong></td><td>Salidas a relé DO1–DO8</td><td>Continuidad NA &lt;0.5Ω, aislamiento NC &gt;1MΩ</td></tr>
+    <tr><td><strong>PT-005</strong></td><td>Comunicaciones RS-485 + USB</td><td>Modbus 9600/115200bps OK, CDC detectado en PC</td></tr>
+    <tr><td><strong>PT-006</strong></td><td>Firmware — ciclo de scan</td><td>Tiempo ciclo &lt;20ms, watchdog recupera, RTC mantiene hora</td></tr>
+  </table></div>
+
+  <h3 class="sub">Pruebas de Prototipo (Fase de Desarrollo)</h3>
+  <pre><code>PT-001 ALIMENTACIÓN ─────────────────────────────────────────────
+  Equipo: Fuente de laboratorio + multímetro + osciloscopio
+  ✓ +5V en rango 4.75–5.25V (rango entrada 19.2–28.8V)
+  ✓ +3.3V en rango 3.2–3.4V
+  ✓ Sin daño por inversión de polaridad (D_POL P600M)
+  ✓ Sin daño por transitorio 1kV/1µs (MOV+TVS)
+  ✓ Ripple +5V &lt;50mV pp / +3.3V &lt;20mV pp
+
+PT-002 ENTRADAS DIGITALES ──────────────────────────────────────
+  Equipo: Fuente 24VDC + PC con QModMaster
+  ✓ Los 12 canales detectan correctamente
+  ✓ Detección entre 18VDC y 30VDC
+  ✓ Tiempo de respuesta &lt;5ms
+  ✓ Sin falsas activaciones con ruido 1kHz
+
+PT-003 SALIDAS A RELÉ ──────────────────────────────────────────
+  Equipo: PC Modbus + multímetro + carga 1A/24VDC
+  ✓ LED rojo enciende al activar por Modbus
+  ✓ Resistencia contacto NA &lt;0.5Ω
+  ✓ Sin pegado de contactos tras 100 ciclos carga
+  ✓ Tiempo de conmutación &lt;10ms
+
+PT-004 RS-485 MODBUS ────────────────────────────────────────────
+  Equipo: Adaptador USB-RS485 + Modbus Poll/QModMaster
+  ✓ Comunicación correcta a 1200–115200 bps
+  ✓ CRC correcto en todas las tramas
+  ✓ Funcionamiento con cable de 100m
+  ✓ Sin errores con variador de frecuencia cercano
+
+PT-005 FIRMWARE / SCAN ─────────────────────────────────────────
+  Equipo: OpenPLC Editor + osciloscopio en GPIO
+  ✓ Tiempo de ciclo &lt;20ms bajo carga
+  ✓ Watchdog genera reset si no recibe kick en 1.6s
+  ✓ RTC mantiene hora correcta con batería CR2032
+  ✓ Sin errores después de 1 hora a 50°C ambiente</code></pre>
+
+  <h3 class="sub">Programa Ladder de Prueba (Structured Text)</h3>
+  <pre><code>(* ColPLC v1.0 — Programa de prueba básico IEC 61131-3 *)
+PROGRAM PLC_TEST
+VAR
+    timer1:   TON;
+    counter1: CTU;
+END_VAR
+
+(* Red 1: Reflejo entradas → salidas *)
+DO1 := DI1;  DO2 := DI2;  DO3 := DI3;  DO4 := DI4;
+DO5 := DI5;  DO6 := DI6;  DO7 := DI7;  DO8 := DI8;
+
+(* Red 2: DO1 parpadea cada 1 segundo *)
+timer1(IN := NOT timer1.Q, PT := T#1000ms);
+IF timer1.Q THEN DO1 := NOT DO1; END_IF;
+
+(* Red 3: Contador en DI9, reset en DI10 *)
+counter1(CU := DI9, R := DI10, PV := 100);
+
+(* Red 4: DO5 activo cuando contador &gt;= 10 *)
+DO5 := (counter1.CV &gt;= 10);
+END_PROGRAM</code></pre>
+
+  <h3 class="sub">Registro de Pruebas (Formato por Unidad)</h3>
+  <pre><code>REGISTRO DE PRUEBAS — ColPLC v1.0
+S/N: _____________   Fecha: __________   Operario: ______________
+
+PT-001 Visual:       □ OK  □ FALLA
+PT-002 +5V: _____ V  □ OK  □ FALLA   +3.3V: _____ V  □ OK  □ FALLA
+PT-003 DI: 1□ 2□ 3□ 4□ 5□ 6□ 7□ 8□ 9□ 10□ 11□ 12□
+PT-004 DO: 1□ 2□ 3□ 4□ 5□ 6□ 7□ 8□
+PT-005 RS-485 9600: □OK   115200: □OK   USB CDC: □OK
+PT-006 Ciclo scan: _____ ms  □OK   Watchdog: □OK   RTC: □OK
+
+RESULTADO: □ APROBADO   □ RECHAZADO   Firma: _______________</code></pre>
+</section>
+
+<!-- ===== CERTIFICACION ===== -->
+<section id="cert">
+  <h2 class="sec">🏅 Plan de Certificación</h2>
+  <div class="info">Ruta completa para certificación en Colombia (RETIE + ICONTEC) y opcionalmente para exportación (CE, UL 508). Costo estimado total: ~$9,500 USD en ~10 meses.</div>
+
+  <h3 class="sub">Normas Aplicables</h3>
+  <div class="tbl-wrap"><table>
+    <tr><th>Norma</th><th>Descripción</th><th>Tipo</th></tr>
+    <tr><td><strong>RETIE 2013</strong></td><td>Reglamento Técnico de Instalaciones Eléctricas — MinMinas Colombia</td><td><span class="tag-r">Obligatoria</span></td></tr>
+    <tr><td><strong>NTC 2050</strong></td><td>Código Eléctrico Colombiano (basado en NEC) — ICONTEC</td><td><span class="tag-r">Obligatoria</span></td></tr>
+    <tr><td><strong>NTC 4552</strong></td><td>Equipos de automatización industrial — ICONTEC</td><td><span class="tag-r">Obligatoria</span></td></tr>
+    <tr><td><strong>IEC 61131-2</strong></td><td>PLC — Requisitos y ensayos de equipos</td><td><span class="tag-rw">Referencia</span></td></tr>
+    <tr><td><strong>IEC 61000-4-2</strong></td><td>EMC — Inmunidad ESD ±4kV contacto / ±8kV aire</td><td><span class="tag-rw">Referencia</span></td></tr>
+    <tr><td><strong>IEC 61000-4-4</strong></td><td>EMC — EFT/Burst ±2kV</td><td><span class="tag-rw">Referencia</span></td></tr>
+    <tr><td><strong>IEC 61000-4-5</strong></td><td>EMC — Surge ±1kV L-L / ±2kV L-PE</td><td><span class="tag-rw">Referencia</span></td></tr>
+    <tr><td><strong>IEC 60068-2-6</strong></td><td>Vibración sinusoidal 10–150Hz</td><td><span class="tag-rw">Referencia</span></td></tr>
+    <tr><td><strong>IEC 60664-1</strong></td><td>Coordinación de aislamiento 250VAC Cat.II</td><td><span class="tag-rw">Referencia</span></td></tr>
+  </table></div>
+
+  <h3 class="sub">Ensayos Eléctricos Requeridos (IEC 61131-2)</h3>
+  <div class="tbl-wrap"><table>
+    <tr><th>Ensayo</th><th>Nivel / Condición</th></tr>
+    <tr><td>Tensión dieléctrica</td><td>500VAC / 1 minuto entre E/S y tierra</td></tr>
+    <tr><td>Resistencia de aislamiento</td><td>&gt;10 MΩ a 500VDC</td></tr>
+    <tr><td>Tensión de impulso</td><td>1kV (forma 1.2/50µs)</td></tr>
+    <tr><td>Corriente de fuga</td><td>&lt;3.5mA</td></tr>
+    <tr><td>ESD (IEC 61000-4-2)</td><td>±4kV contacto / ±8kV aire — carcasa</td></tr>
+    <tr><td>EFT/Burst (IEC 61000-4-4)</td><td>±2kV — alimentación y E/S</td></tr>
+    <tr><td>Surge (IEC 61000-4-5)</td><td>±1kV L-L / ±2kV L-PE — alimentación</td></tr>
+    <tr><td>Temperatura operación</td><td>-10°C a +60°C, 16 horas</td></tr>
+    <tr><td>Humedad</td><td>95% HR, 40°C, 48 horas</td></tr>
+    <tr><td>Vibración</td><td>10–57Hz 0.075mm / 57–150Hz 1g</td></tr>
+  </table></div>
+
+  <h3 class="sub">Laboratorios de Ensayo en Colombia</h3>
+  <div class="tbl-wrap"><table>
+    <tr><th>Laboratorio</th><th>Ciudad</th><th>Servicios</th><th>Contacto</th></tr>
+    <tr><td><strong>ICONTEC</strong></td><td>Bogotá</td><td>Certificación, ensayos EMC</td><td>www.icontec.org</td></tr>
+    <tr><td><strong>CIDET</strong></td><td>Medellín</td><td>Ensayos eléctricos, EMC</td><td>www.cidet.org.co</td></tr>
+    <tr><td><strong>ONAC</strong></td><td>Nacional</td><td>Acreditación de laboratorios</td><td>www.onac.org.co</td></tr>
+    <tr><td><strong>SGS Colombia</strong></td><td>Bogotá</td><td>Ensayos y certificación</td><td>sgs.com/es-co</td></tr>
+    <tr><td><strong>UL Colombia</strong></td><td>Bogotá</td><td>Certificación UL/CE (exportación)</td><td>ul.com/es</td></tr>
+  </table></div>
+
+  <h3 class="sub">Cronograma y Costos</h3>
+  <div class="timeline">
+    <div class="tl-item"><h4>Fase 1 — Diseño y prototipo (3 meses)</h4><p>PCB + componentes + ensamble + firmware básico. Costo: ~$2,000 USD</p></div>
+    <div class="tl-item"><h4>Fase 2 — Pruebas internas (1 mes)</h4><p>Plan de pruebas PT-001 a PT-006 sobre 3–5 prototipos. Costo: ~$500 USD</p></div>
+    <div class="tl-item"><h4>Fase 3 — Ensayos en laboratorio (2 meses)</h4><p>CIDET o ICONTEC — ensayos EMC, dieléctricos, ambientales. Costo: ~$3,000 USD</p></div>
+    <div class="tl-item"><h4>Fase 4 — Correcciones (1 mes)</h4><p>Ajustes de diseño según resultados de ensayos. Costo: ~$500 USD</p></div>
+    <div class="tl-item"><h4>Fase 5 — Certificación ICONTEC (2 meses)</h4><p>Trámite formal de certificación y marcado. Costo: ~$2,500 USD</p></div>
+    <div class="tl-item"><h4>Fase 6 — Producción piloto (1 mes)</h4><p>Lote de 10–50 unidades con control de calidad. Costo: ~$1,000 USD</p></div>
+  </div>
+  <div class="ok"><strong>Total estimado: ~10 meses / ~$9,500 USD</strong> para certificación completa en Colombia</div>
+
+  <h3 class="sub">Documentos Requeridos para Certificación</h3>
+  <ul class="checklist">
+    <li>Manual técnico con especificaciones eléctricas completas</li>
+    <li>Esquemáticos eléctricos firmados por ingeniero responsable</li>
+    <li>Lista de materiales (BOM) con datasheets de componentes críticos</li>
+    <li>Informe de ensayos de laboratorio acreditado ONAC</li>
+    <li>Declaración de conformidad firmada por el fabricante</li>
+    <li>Manual de usuario en español con instrucciones de seguridad</li>
+    <li class="warn-item">Para CE (exportación a Europa): ensayos adicionales en laboratorio notificado europeo</li>
+  </ul>
+</section>
+
+</main><!-- fin main -->
+
+<script>
+function show(id, el) {
+  // Ocultar todas las secciones
+  document.querySelectorAll('section').forEach(s => s.classList.remove('active'));
+  // Quitar active de todos los links
+  document.querySelectorAll('nav ul li a').forEach(a => a.classList.remove('active'));
+  // Mostrar sección seleccionada
+  document.getElementById(id).classList.add('active');
+  // Marcar link activo
+  el.classList.add('active');
+  // Scroll al top del main
+  window.scrollTo(0, 0);
+  return false;
+}
+
+// Animar barras de costo al entrar a la sección BOM
+document.querySelectorAll('nav ul li a').forEach(function(link) {
+  link.addEventListener('click', function() {
+    setTimeout(function() {
+      document.querySelectorAll('.cost-bar .fill').forEach(function(bar) {
+        var w = bar.style.width;
+        bar.style.width = '0';
+        setTimeout(function() { bar.style.width = w; }, 50);
+      });
+    }, 100);
+  });
+});
+
+// Destacar sección activa en la URL al cargar
+window.addEventListener('DOMContentLoaded', function() {
+  var hash = window.location.hash.replace('#','');
+  if (hash) {
+    var link = document.querySelector('nav ul li a[onclick*="' + hash + '"]');
+    if (link) link.click();
+  }
+});
+
+// Atajos de teclado: ← → para navegar entre secciones
+var secciones = ['inicio','specs','arquitectura','entradas','salidas',
+                 'alimentacion','firmware','modbus','expansion',
+                 'bom','mecanico','pcb','pruebas','cert'];
+document.addEventListener('keydown', function(e) {
+  var actual = document.querySelector('section.active');
+  if (!actual) return;
+  var idx = secciones.indexOf(actual.id);
+  if (e.key === 'ArrowRight' && idx < secciones.length - 1) {
+    var next = document.querySelector('nav ul li a[onclick*="' + secciones[idx+1] + '"]');
+    if (next) next.click();
+  }
+  if (e.key === 'ArrowLeft' && idx > 0) {
+    var prev = document.querySelector('nav ul li a[onclick*="' + secciones[idx-1] + '"]');
+    if (prev) prev.click();
+  }
+});
+</script>
+</body>
+</html>
